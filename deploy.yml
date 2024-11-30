@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Setup SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_SERVER: ${{ secrets.SSH_SERVER }}
+          SSH_PUB_KEY: ${{ secrets.SSH_PUB_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+          echo "${SSH_PUB_KEY}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa.pub
+
+      # - name: Add Known Hosts
+      #   run: |
+      #     touch ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
+      #     ssh-keyscan -H ${SSH_HOST} >> ~/.ssh/known_hosts
+
+      # - name: Deploy Server
+      #   run: |
+      #     ssh ${SSH_SERVER} "bash -s" < "./deploy.sh"
